@@ -1,5 +1,18 @@
-import { ScreenPlaceholder } from '@/components/screen-placeholder';
+import { HabitForm } from '@/components/habit-form';
+import { useHabits } from '@/context/habits-context';
+import { goBackOr } from '@/utils/navigation';
 
 export default function NewHabitScreen() {
-  return <ScreenPlaceholder title="Novo hábito" icon="plus-circle" />;
+  const { addHabit } = useHabits();
+
+  return (
+    <HabitForm
+      submitLabel="Criar hábito"
+      onCancel={() => goBackOr('/habitos')}
+      onSubmit={(input) => {
+        addHabit(input);
+        goBackOr('/habitos');
+      }}
+    />
+  );
 }

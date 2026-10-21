@@ -1,5 +1,5 @@
 import type { Habit } from '@/types/habit';
-import { addDays, lastDays, toDateKey, todayKey } from '@/utils/date';
+import { addDays, lastDays, parseDateKey, toDateKey, todayKey } from '@/utils/date';
 
 export function isScheduledOn(habit: Habit, date: Date): boolean {
   return habit.frequency === 'diario' || habit.weekDays.includes(date.getDay());
@@ -32,7 +32,7 @@ export function currentStreak(habit: Habit): number {
 export function bestStreak(habit: Habit): number {
   let best = 0;
   let streak = 0;
-  let date = new Date(`${habit.createdAt}T00:00:00`);
+  let date = parseDateKey(habit.createdAt);
   const today = todayKey();
   while (toDateKey(date) <= today) {
     if (isScheduledOn(habit, date)) {

@@ -23,3 +23,11 @@ export function lastDays(count: number): Date[] {
 export function formatLongDate(date: Date): string {
   return date.toLocaleDateString('pt-BR', { weekday: 'long', day: 'numeric', month: 'long' });
 }
+
+export function parseDateKey(key: string): Date {
+  return new Date(`${key}T00:00:00`);
+}
+
+export function formatShortDate(date: Date): string {
+  return date.toLocaleDateString('pt-BR');
+}
