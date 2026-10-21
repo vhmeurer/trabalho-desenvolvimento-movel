@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "trabalho-desenvolvimento-movel",
-    "slug": "trabalho-desenvolvimento-movel",
+    "name": "Gestor de Hábitos",
+    "slug": "gestor-de-habitos",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",

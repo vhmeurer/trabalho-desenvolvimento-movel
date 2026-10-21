@@ -1,65 +1,71 @@
-/**
- * Below are the colors that are used in the app. The colors are defined in the light and dark mode.
- * There are many other ways to style your app. For example, [Nativewind](https://www.nativewind.dev/), [Tamagui](https://tamagui.dev/), [unistyles](https://unistyl.es/), etc.
- */
 
-import '@/global.css';
 
-import { Platform } from 'react-native';
+import { DarkTheme, DefaultTheme, type Theme } from 'expo-router';
+import { MD3DarkTheme, MD3LightTheme, type MD3Theme } from 'react-native-paper';
 
-export const Colors = {
-  light: {
-    text: '#000000',
-    background: '#ffffff',
-    backgroundElement: '#F0F0F3',
-    backgroundSelected: '#E0E1E6',
-    textSecondary: '#60646C',
+export const LightTheme: MD3Theme = {
+  ...MD3LightTheme,
+  colors: {
+    ...MD3LightTheme.colors,
+    primary: '#2E7D6B',
+    onPrimary: '#FFFFFF',
+    primaryContainer: '#B4EFDB',
+    onPrimaryContainer: '#00201A',
+    secondary: '#4B635B',
+    secondaryContainer: '#CDE8DD',
+    onSecondaryContainer: '#06201A',
+    tertiary: '#416277',
+    tertiaryContainer: '#C5E7FF',
+    background: '#F6FBF8',
+    surface: '#F6FBF8',
+    surfaceVariant: '#DBE5E0',
+    onSurfaceVariant: '#3F4945',
+    outline: '#6F7975',
+    outlineVariant: '#BFC9C4',
   },
-  dark: {
-    text: '#ffffff',
-    background: '#000000',
-    backgroundElement: '#212225',
-    backgroundSelected: '#2E3135',
-    textSecondary: '#B0B4BA',
-  },
-} as const;
+};
 
-export type ThemeColor = keyof typeof Colors.light & keyof typeof Colors.dark;
+export const AppDarkTheme: MD3Theme = {
+  ...MD3DarkTheme,
+  colors: {
+    ...MD3DarkTheme.colors,
+    primary: '#83D5BF',
+    onPrimary: '#00382D',
+    primaryContainer: '#005143',
+    onPrimaryContainer: '#B4EFDB',
+    secondary: '#B1CCC1',
+    secondaryContainer: '#334B44',
+    onSecondaryContainer: '#CDE8DD',
+    tertiary: '#A9CBE3',
+    tertiaryContainer: '#284A5E',
+    background: '#0F1513',
+    surface: '#0F1513',
+    surfaceVariant: '#3F4945',
+    onSurfaceVariant: '#BFC9C4',
+    outline: '#89938F',
+    outlineVariant: '#3F4945',
+  },
+};
 
-export const Fonts = Platform.select({
-  ios: {
-    /** iOS `UIFontDescriptorSystemDesignDefault` */
-    sans: 'system-ui',
-    /** iOS `UIFontDescriptorSystemDesignSerif` */
-    serif: 'ui-serif',
-    /** iOS `UIFontDescriptorSystemDesignRounded` */
-    rounded: 'ui-rounded',
-    /** iOS `UIFontDescriptorSystemDesignMonospaced` */
-    mono: 'ui-monospace',
-  },
-  default: {
-    sans: 'normal',
-    serif: 'serif',
-    rounded: 'normal',
-    mono: 'monospace',
-  },
-  web: {
-    sans: 'var(--font-display)',
-    serif: 'var(--font-serif)',
-    rounded: 'var(--font-rounded)',
-    mono: 'var(--font-mono)',
-  },
-});
+export function getNavigationTheme(paperTheme: MD3Theme, dark: boolean): Theme {
+  const base = dark ? DarkTheme : DefaultTheme;
+  return {
+    ...base,
+    colors: {
+      ...base.colors,
+      primary: paperTheme.colors.primary,
+      background: paperTheme.colors.background,
+      card: paperTheme.colors.surface,
+      text: paperTheme.colors.onSurface,
+      border: paperTheme.colors.outlineVariant,
+    },
+  };
+}
 
 export const Spacing = {
-  half: 2,
-  one: 4,
-  two: 8,
-  three: 16,
-  four: 24,
-  five: 32,
-  six: 64,
+  xs: 4,
+  sm: 8,
+  md: 16,
+  lg: 24,
+  xl: 32,
 } as const;
-
-export const BottomTabInset = Platform.select({ ios: 50, android: 80 }) ?? 0;
-export const MaxContentWidth = 800;
