@@ -17,6 +17,8 @@ function ThemedApp() {
         <Stack screenOptions={{ headerBackButtonDisplayMode: 'minimal' }}>
           <Stack.Screen name="index" options={{ headerShown: false }} />
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
+          <Stack.Screen name="habito/novo" options={{ title: 'Novo hábito', presentation: 'modal' }} />
+          <Stack.Screen name="habito/[id]" options={{ title: 'Detalhes do hábito' }} />
         </Stack>
       </ThemeProvider>
     </PaperProvider>

@@ -1,5 +1,3 @@
-/** Cálculos de progresso dos hábitos: agenda do dia, sequências e taxa de conclusão. */
-
 import type { Habit } from '@/types/habit';
 import { addDays, lastDays, toDateKey, todayKey } from '@/utils/date';
 
@@ -15,10 +13,6 @@ export function isCompletedToday(habit: Habit): boolean {
   return habit.completions.includes(todayKey());
 }
 
-/**
- * Quantidade de dias programados seguidos em que o hábito foi concluído.
- * Se o hábito ainda não foi feito hoje, a contagem começa por ontem, para não zerar a sequência antes do fim do dia.
- */
 export function currentStreak(habit: Habit): number {
   let date = new Date();
   if (!isCompletedOn(habit, date)) date = addDays(date, -1);
@@ -50,7 +44,6 @@ export function bestStreak(habit: Habit): number {
   return best;
 }
 
-/** Fração (de 0 a 1) dos dias programados nos últimos `days` dias em que o hábito foi concluído. */
 export function completionRate(habit: Habit, days: number): number {
   const scheduled = lastDays(days).filter(
     (date) => toDateKey(date) >= habit.createdAt && isScheduledOn(habit, date)

@@ -1,5 +1,3 @@
-/** Navegação por abas inferiores: Hoje, Hábitos, Estatísticas e Perfil. */
-
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { Tabs } from 'expo-router/js-tabs';
 import type { ColorValue } from 'react-native';
@@ -9,7 +7,6 @@ type IconName = keyof typeof MaterialCommunityIcons.glyphMap;
 
 function tabIcon(name: IconName) {
   return function TabIcon({ color, size }: { color: ColorValue; size: number }) {
-    // As cores das abas vêm do tema do Paper, que são sempre strings.
     return <MaterialCommunityIcons name={name} color={color as string} size={size} />;
   };
 }

@@ -1,5 +1,4 @@
-
-import type { CategoryId } from '@/types/habit';
+import type { CategoryId, Habit } from '@/types/habit';
 
 export const CATEGORIES: { id: CategoryId; label: string; icon: string }[] = [
   { id: 'saude', label: 'Saúde', icon: 'heart-pulse' },
@@ -31,3 +30,11 @@ export const HABIT_ICONS = [
 ];
 
 export const WEEK_DAYS = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+
+export function formatFrequency(habit: Pick<Habit, 'frequency' | 'weekDays'>) {
+  if (habit.frequency === 'diario') return 'Todos os dias';
+  return [...habit.weekDays]
+    .sort()
+    .map((day) => WEEK_DAYS[day])
+    .join(', ');
+}

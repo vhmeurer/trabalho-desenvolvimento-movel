@@ -1,5 +1,3 @@
-/** Funções auxiliares de data. As datas são guardadas como texto "YYYY-MM-DD", no horário local. */
-
 export function toDateKey(date: Date): string {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
@@ -17,7 +15,6 @@ export function addDays(date: Date, amount: number): Date {
   return result;
 }
 
-/** Retorna os últimos `count` dias, do mais antigo até hoje. */
 export function lastDays(count: number): Date[] {
   const today = new Date();
   return Array.from({ length: count }, (_, index) => addDays(today, index - (count - 1)));

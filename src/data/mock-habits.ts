@@ -1,12 +1,6 @@
-/**
- * Hábitos de exemplo. Não há backend nesta etapa, então o histórico de conclusões
- * é gerado a partir da data atual para que as telas sempre mostrem dados recentes.
- */
-
 import type { Habit } from '@/types/habit';
 import { addDays, lastDays, toDateKey } from '@/utils/date';
 
-/** Marca como concluídos os dias dos últimos `days` dias em que `pattern(index)` for verdadeiro (index 0 = hoje). */
 function history(days: number, pattern: (index: number) => boolean): string[] {
   return lastDays(days)
     .reverse()
