@@ -4,6 +4,7 @@ import { PaperProvider } from 'react-native-paper';
 
 import { AppDarkTheme, getNavigationTheme, LightTheme } from '@/constants/theme';
 import { HabitsProvider } from '@/context/habits-context';
+import { ProfileProvider } from '@/context/profile-context';
 import { PreferencesProvider, usePreferences } from '@/context/preferences-context';
 
 function ThemedApp() {
@@ -18,6 +19,7 @@ function ThemedApp() {
           <Stack.Screen name="index" options={{ headerShown: false }} />
           <Stack.Screen name="login" options={{ headerShown: false }} />
           <Stack.Screen name="registro" options={{ headerShown: false }} />
+          <Stack.Screen name="perfil/editar" options={{ title: 'Editar perfil' }} />
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="habito/novo" options={{ title: 'Novo hábito', presentation: 'modal' }} />
           <Stack.Screen name="habito/[id]" options={{ title: 'Detalhes do hábito' }} />
@@ -31,9 +33,11 @@ function ThemedApp() {
 export default function RootLayout() {
   return (
     <PreferencesProvider>
-      <HabitsProvider>
-        <ThemedApp />
-      </HabitsProvider>
+      <ProfileProvider>
+        <HabitsProvider>
+          <ThemedApp />
+        </HabitsProvider>
+      </ProfileProvider>
     </PreferencesProvider>
   );
 }
