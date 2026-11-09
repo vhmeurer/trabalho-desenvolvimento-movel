@@ -16,6 +16,8 @@ function ThemedApp() {
         <StatusBar style={darkMode ? 'light' : 'dark'} />
         <Stack screenOptions={{ headerBackButtonDisplayMode: 'minimal' }}>
           <Stack.Screen name="index" options={{ headerShown: false }} />
+          <Stack.Screen name="login" options={{ headerShown: false }} />
+          <Stack.Screen name="registro" options={{ headerShown: false }} />
           <Stack.Screen name="(tabs)" options={{ headerShown: false }} />
           <Stack.Screen name="habito/novo" options={{ title: 'Novo hábito', presentation: 'modal' }} />
           <Stack.Screen name="habito/[id]" options={{ title: 'Detalhes do hábito' }} />
