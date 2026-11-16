@@ -4,7 +4,9 @@ import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { Button, HelperText, Text, TextInput, useTheme } from 'react-native-paper';
 
+import { PasswordRequirements } from '@/components/password-requirements';
 import { Spacing } from '@/constants/theme';
+import { validateEmail, validateName, validateNewPassword, validatePasswordConfirmation } from '@/utils/validation';
 
 export default function RegisterScreen() {
   const theme = useTheme();
@@ -15,13 +17,14 @@ export default function RegisterScreen() {
   const [submitted, setSubmitted] = useState(false);
   const [passwordVisible, setPasswordVisible] = useState(false);
   const [confirmationVisible, setConfirmationVisible] = useState(false);
-  const emailError = email.trim() === '' ? 'Informe seu e-mail.' : !/^\S+@\S+\.\S+$/.test(email.trim()) ? 'Informe um e-mail válido.' : '';
-  const passwordError = password.length < 8 ? 'A senha deve ter pelo menos 8 caracteres.' : '';
-  const confirmationError = confirmation.length === 0 ? 'Confirme sua senha.' : confirmation !== password ? 'As senhas não coincidem.' : '';
+  const nameError = validateName(name);
+  const emailError = validateEmail(email);
+  const passwordError = validateNewPassword(password);
+  const confirmationError = validatePasswordConfirmation(password, confirmation);
 
   function handleSubmit() {
     setSubmitted(true);
-    if (!name.trim() || emailError || passwordError || confirmationError) return;
+    if (nameError || emailError || passwordError || confirmationError) return;
     router.replace('/(tabs)');
   }
 
@@ -40,8 +43,8 @@ export default function RegisterScreen() {
 
         <View style={styles.form}>
           <View>
-            <TextInput mode="outlined" label="Nome" placeholder="Como podemos te chamar?" value={name} onChangeText={setName} autoCapitalize="words" autoComplete="name" textContentType="name" left={<TextInput.Icon icon="account-outline" />} error={submitted && !name.trim()} returnKeyType="next" />
-            <HelperText type="error" visible={submitted && !name.trim()}>Informe seu nome.</HelperText>
+            <TextInput mode="outlined" label="Nome" placeholder="Como podemos te chamar?" value={name} onChangeText={setName} autoCapitalize="words" autoComplete="name" textContentType="name" left={<TextInput.Icon icon="account-outline" />} error={submitted && !!nameError} returnKeyType="next" />
+            <HelperText type="error" visible={submitted && !!nameError}>{nameError}</HelperText>
           </View>
           <View>
             <TextInput mode="outlined" label="E-mail" placeholder="voce@exemplo.com" value={email} onChangeText={setEmail} autoCapitalize="none" autoComplete="email" keyboardType="email-address" textContentType="emailAddress" left={<TextInput.Icon icon="email-outline" />} error={submitted && !!emailError} returnKeyType="next" />
@@ -49,7 +52,7 @@ export default function RegisterScreen() {
           </View>
           <View>
             <TextInput mode="outlined" label="Senha" value={password} onChangeText={setPassword} secureTextEntry={!passwordVisible} autoComplete="new-password" textContentType="newPassword" left={<TextInput.Icon icon="lock-outline" />} right={<TextInput.Icon icon={passwordVisible ? 'eye-off-outline' : 'eye-outline'} onPress={() => setPasswordVisible((value) => !value)} />} error={submitted && !!passwordError} returnKeyType="next" />
-            <HelperText type="error" visible={submitted && !!passwordError}>{passwordError || 'Use pelo menos 8 caracteres.'}</HelperText>
+            <PasswordRequirements password={password} showErrors={submitted} />
           </View>
           <View>
             <TextInput mode="outlined" label="Confirmar senha" value={confirmation} onChangeText={setConfirmation} secureTextEntry={!confirmationVisible} autoComplete="new-password" left={<TextInput.Icon icon="lock-check-outline" />} right={<TextInput.Icon icon={confirmationVisible ? 'eye-off-outline' : 'eye-outline'} onPress={() => setConfirmationVisible((value) => !value)} />} error={submitted && !!confirmationError} returnKeyType="done" onSubmitEditing={handleSubmit} />

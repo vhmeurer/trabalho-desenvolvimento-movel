@@ -5,6 +5,7 @@ import { Button, HelperText, Text, TextInput, useTheme } from 'react-native-pape
 
 import { Spacing } from '@/constants/theme';
 import { useProfile } from '@/context/profile-context';
+import { validateEmail, validateName } from '@/utils/validation';
 
 export default function EditProfileScreen() {
   const theme = useTheme();
@@ -13,8 +14,8 @@ export default function EditProfileScreen() {
   const [email, setEmail] = useState(profile.email);
   const [submitted, setSubmitted] = useState(false);
 
-  const nameError = name.trim() ? '' : 'Informe seu nome.';
-  const emailError = email.trim() === '' ? 'Informe seu e-mail.' : !/^\S+@\S+\.\S+$/.test(email.trim()) ? 'Informe um e-mail válido.' : '';
+  const nameError = validateName(name);
+  const emailError = validateEmail(email);
 
   function handleSave() {
     setSubmitted(true);

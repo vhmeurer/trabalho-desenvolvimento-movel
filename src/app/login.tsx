@@ -5,6 +5,7 @@ import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 're
 import { Button, HelperText, Text, TextInput, useTheme } from 'react-native-paper';
 
 import { Spacing } from '@/constants/theme';
+import { validateEmail } from '@/utils/validation';
 
 export default function LoginScreen() {
   const theme = useTheme();
@@ -12,7 +13,7 @@ export default function LoginScreen() {
   const [password, setPassword] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [passwordVisible, setPasswordVisible] = useState(false);
-  const emailError = email.trim() === '' ? 'Informe seu e-mail.' : !/^\S+@\S+\.\S+$/.test(email.trim()) ? 'Informe um e-mail válido.' : '';
+  const emailError = validateEmail(email);
   const passwordError = password.length === 0 ? 'Informe sua senha.' : '';
 
   function handleSubmit() {
