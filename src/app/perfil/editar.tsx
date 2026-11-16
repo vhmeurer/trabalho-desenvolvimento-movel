@@ -5,23 +5,30 @@ import { Button, HelperText, Text, TextInput, useTheme } from 'react-native-pape
 
 import { Spacing } from '@/constants/theme';
 import { useProfile } from '@/context/profile-context';
-import { validateEmail, validateName } from '@/utils/validation';
+import { validateName } from '@/utils/validation';
 
 export default function EditProfileScreen() {
   const theme = useTheme();
   const { profile, updateProfile } = useProfile();
   const [name, setName] = useState(profile.name);
-  const [email, setEmail] = useState(profile.email);
   const [submitted, setSubmitted] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
 
   const nameError = validateName(name);
-  const emailError = validateEmail(email);
 
-  function handleSave() {
+  async function handleSave() {
     setSubmitted(true);
-    if (nameError || emailError) return;
-    updateProfile({ name: name.trim(), email: email.trim() });
-    router.back();
+    setSaveError('');
+    if (nameError) return;
+    setSaving(true);
+    try {
+      await updateProfile({ name: name.trim() });
+      router.back();
+    } catch {
+      setSaveError('Não foi possível salvar agora. Verifique sua conexão e tente de novo.');
+      setSaving(false);
+    }
   }
 
   return (
@@ -30,7 +37,7 @@ export default function EditProfileScreen() {
         <View style={styles.intro}>
           <Text variant="headlineSmall">Editar informações</Text>
           <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-            Mantenha seus dados de perfil atualizados.
+            Altere como seu nome aparece no app.
           </Text>
         </View>
 
@@ -46,7 +53,8 @@ export default function EditProfileScreen() {
             textContentType="name"
             left={<TextInput.Icon icon="account-outline" />}
             error={submitted && !!nameError}
-            returnKeyType="next"
+            returnKeyType="done"
+            onSubmitEditing={handleSave}
           />
           <HelperText type="error" visible={submitted && !!nameError}>{nameError}</HelperText>
         </View>
@@ -56,29 +64,30 @@ export default function EditProfileScreen() {
             mode="outlined"
             label="E-mail"
             placeholder="voce@exemplo.com"
-            value={email}
-            onChangeText={setEmail}
-            autoCapitalize="none"
-            autoComplete="email"
-            keyboardType="email-address"
-            textContentType="emailAddress"
+            value={profile.email}
+            disabled
             left={<TextInput.Icon icon="email-outline" />}
-            error={submitted && !!emailError}
-            returnKeyType="done"
-            onSubmitEditing={handleSave}
           />
-          <HelperText type="error" visible={submitted && !!emailError}>{emailError}</HelperText>
+          <HelperText type="info" visible>
+            O e-mail é usado para entrar no app e não pode ser alterado aqui.
+          </HelperText>
         </View>
 
         <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
-          A senha não é exibida nem armazenada nos dados do perfil. A gestão de credenciais será feita pelo serviço de autenticação.
+          Para trocar a senha, use &quot;Esqueci minha senha&quot; na tela de login.
         </Text>
+
+        {saveError !== '' && (
+          <HelperText type="error" visible>
+            {saveError}
+          </HelperText>
+        )}
 
         <View style={styles.actions}>
           <Button mode="outlined" onPress={() => router.back()} style={styles.action}>
             Cancelar
           </Button>
-          <Button mode="contained" icon="content-save-outline" onPress={handleSave} style={styles.action}>
+          <Button mode="contained" icon="content-save-outline" onPress={handleSave} loading={saving} disabled={saving} style={styles.action}>
             Salvar
           </Button>
         </View>

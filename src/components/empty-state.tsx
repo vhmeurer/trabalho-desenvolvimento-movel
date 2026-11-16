@@ -9,9 +9,21 @@ type EmptyStateProps = {
   message: string;
   actionLabel?: string;
   onAction?: () => void;
+  secondaryActionLabel?: string;
+  onSecondaryAction?: () => void;
+  secondaryActionLoading?: boolean;
 };
 
-export function EmptyState({ icon, title, message, actionLabel, onAction }: EmptyStateProps) {
+export function EmptyState({
+  icon,
+  title,
+  message,
+  actionLabel,
+  onAction,
+  secondaryActionLabel,
+  onSecondaryAction,
+  secondaryActionLoading,
+}: EmptyStateProps) {
   const theme = useTheme();
 
   return (
@@ -24,6 +36,16 @@ export function EmptyState({ icon, title, message, actionLabel, onAction }: Empt
       {actionLabel && onAction && (
         <Button mode="contained-tonal" icon="plus" onPress={onAction} style={styles.action}>
           {actionLabel}
+        </Button>
+      )}
+      {secondaryActionLabel && onSecondaryAction && (
+        <Button
+          mode="text"
+          icon="database-import-outline"
+          onPress={onSecondaryAction}
+          loading={secondaryActionLoading}
+          disabled={secondaryActionLoading}>
+          {secondaryActionLabel}
         </Button>
       )}
     </View>

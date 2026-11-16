@@ -1,11 +1,11 @@
 import type { CategoryId, Habit } from '@/types/habit';
 
-export const CATEGORIES: { id: CategoryId; label: string; icon: string }[] = [
-  { id: 'saude', label: 'Saúde', icon: 'heart-pulse' },
-  { id: 'estudos', label: 'Estudos', icon: 'book-open-variant' },
-  { id: 'produtividade', label: 'Produtividade', icon: 'briefcase-check' },
-  { id: 'bem-estar', label: 'Bem-estar', icon: 'meditation' },
-  { id: 'financas', label: 'Finanças', icon: 'piggy-bank' },
+export const CATEGORIES: { id: CategoryId; label: string; icon: string; color: string }[] = [
+  { id: 'saude', label: 'Saúde', icon: 'heart-pulse', color: '#E53935' },
+  { id: 'estudos', label: 'Estudos', icon: 'book-open-variant', color: '#8E24AA' },
+  { id: 'produtividade', label: 'Produtividade', icon: 'briefcase-check', color: '#1E88E5' },
+  { id: 'bem-estar', label: 'Bem-estar', icon: 'meditation', color: '#2E7D6B' },
+  { id: 'financas', label: 'Finanças', icon: 'piggy-bank', color: '#F9A825' },
 ];
 
 export function getCategory(id: CategoryId) {

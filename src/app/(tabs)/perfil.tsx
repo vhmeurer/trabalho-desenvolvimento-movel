@@ -1,4 +1,4 @@
-import { router, type Href } from "expo-router";
+import { router } from "expo-router";
 import { ScrollView, StyleSheet, View } from "react-native";
 import {
   Avatar,
@@ -11,11 +11,13 @@ import {
 } from "react-native-paper";
 
 import { Spacing } from "@/constants/theme";
+import { useAuth } from "@/context/auth-context";
 import { useProfile } from "@/context/profile-context";
 
 export default function ProfileScreen() {
   const theme = useTheme();
   const { profile } = useProfile();
+  const { signOut } = useAuth();
   const initials = profile.name
     .trim()
     .split(/\s+/)
@@ -54,12 +56,6 @@ export default function ProfileScreen() {
             >
               {profile.email}
             </Text>
-            <Text
-              variant="labelMedium"
-              style={{ color: theme.colors.onPrimaryContainer }}
-            >
-              Conta de demonstração
-            </Text>
           </View>
         </Card.Content>
       </Card>
@@ -86,22 +82,23 @@ export default function ProfileScreen() {
         <Card mode="outlined">
           <List.Item
             title="Editar informações"
-            description="Atualize seu nome e e-mail"
+            description="Atualize seu nome"
             left={(props) => (
               <List.Icon {...props} icon="account-edit-outline" />
             )}
             right={(props) => <List.Icon {...props} icon="chevron-right" />}
-            onPress={() => router.push("/perfil/editar" as Href)}
+            onPress={() => router.push("/perfil/editar")}
           />
         </Card>
       </View>
 
       <Button
         mode="outlined"
-        icon="pencil-outline"
-        onPress={() => router.push("/perfil/editar" as Href)}
+        icon="logout"
+        textColor={theme.colors.error}
+        onPress={signOut}
       >
-        Editar perfil
+        Sair da conta
       </Button>
     </ScrollView>
   );
@@ -117,5 +114,4 @@ const styles = StyleSheet.create({
   },
   identity: { flex: 1, gap: Spacing.xs },
   section: { gap: Spacing.sm },
-  disclaimer: { textAlign: "center" },
 });

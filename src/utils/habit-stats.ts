@@ -44,10 +44,28 @@ export function bestStreak(habit: Habit): number {
   return best;
 }
 
+export function existedOn(habit: Habit, date: Date): boolean {
+  return toDateKey(date) >= habit.createdAt;
+}
+
 export function completionRate(habit: Habit, days: number): number {
-  const scheduled = lastDays(days).filter(
-    (date) => toDateKey(date) >= habit.createdAt && isScheduledOn(habit, date)
-  );
-  if (scheduled.length === 0) return 0;
-  return scheduled.filter((date) => isCompletedOn(habit, date)).length / scheduled.length;
+  return completionRateOn([habit], lastDays(days)) ?? 0;
+}
+
+export function completionRateOn(habits: Habit[], dates: Date[]): number | null {
+  let scheduled = 0;
+  let done = 0;
+  for (const date of dates) {
+    for (const habit of habits) {
+      if (!existedOn(habit, date) || !isScheduledOn(habit, date)) continue;
+      scheduled++;
+      if (isCompletedOn(habit, date)) done++;
+    }
+  }
+  return scheduled === 0 ? null : done / scheduled;
+}
+
+export function countCompletionsOn(habits: Habit[], dates: Date[]): number {
+  const keys = new Set(dates.map(toDateKey));
+  return habits.reduce((total, habit) => total + habit.completions.filter((key) => keys.has(key)).length, 0);
 }

@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
-import { Card, FAB, ProgressBar, Snackbar, Text, useTheme } from 'react-native-paper';
+import { ActivityIndicator, Card, FAB, ProgressBar, Snackbar, Text, useTheme } from 'react-native-paper';
 
 import { EmptyState } from '@/components/empty-state';
 import { HabitCard } from '@/components/habit-card';
@@ -24,7 +24,7 @@ function capitalize(text: string) {
 
 export default function TodayScreen() {
   const theme = useTheme();
-  const { habits, toggleToday } = useHabits();
+  const { habits, loading, toggleToday } = useHabits();
   const [snackbar, setSnackbar] = useState<{ habitId: string; message: string } | null>(null);
 
   const today = new Date();
@@ -81,7 +81,9 @@ export default function TodayScreen() {
           </Card.Content>
         </Card>
 
-        {scheduled.length === 0 ? (
+        {loading ? (
+          <ActivityIndicator style={styles.loader} />
+        ) : scheduled.length === 0 ? (
           <EmptyState
             icon="calendar-blank"
             title="Nenhum hábito para hoje"
@@ -149,6 +151,9 @@ const styles = StyleSheet.create({
   },
   snackbar: {
     bottom: 72,
+  },
+  loader: {
+    marginTop: Spacing.xl,
   },
   sectionTitle: {
     marginTop: Spacing.sm,

@@ -1,25 +1,51 @@
 import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
-import { Link, router } from 'expo-router';
+import { Link } from 'expo-router';
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { Button, HelperText, Text, TextInput, useTheme } from 'react-native-paper';
 
 import { Spacing } from '@/constants/theme';
+import { useAuth } from '@/context/auth-context';
+import { authErrorMessage } from '@/services/auth-errors';
 import { validateEmail } from '@/utils/validation';
 
 export default function LoginScreen() {
   const theme = useTheme();
+  const { signIn, resetPassword } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [submitted, setSubmitted] = useState(false);
   const [passwordVisible, setPasswordVisible] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [feedback, setFeedback] = useState<{ type: 'error' | 'info'; message: string } | null>(null);
   const emailError = validateEmail(email);
   const passwordError = password.length === 0 ? 'Informe sua senha.' : '';
 
-  function handleSubmit() {
+  async function handleSubmit() {
     setSubmitted(true);
+    setFeedback(null);
     if (emailError || passwordError) return;
-    router.replace('/(tabs)');
+    setLoading(true);
+    try {
+      await signIn(email, password);
+    } catch (error) {
+      setFeedback({ type: 'error', message: authErrorMessage(error) });
+      setLoading(false);
+    }
+  }
+
+  async function handleResetPassword() {
+    if (emailError) {
+      setSubmitted(true);
+      setFeedback({ type: 'error', message: 'Digite seu e-mail acima para receber o link de redefinição.' });
+      return;
+    }
+    try {
+      await resetPassword(email);
+      setFeedback({ type: 'info', message: `Se existir uma conta com ${email.trim()}, enviamos um link para redefinir a senha.` });
+    } catch (error) {
+      setFeedback({ type: 'error', message: authErrorMessage(error) });
+    }
   }
 
   return (
@@ -37,14 +63,48 @@ export default function LoginScreen() {
 
         <View style={styles.form}>
           <View>
-            <TextInput mode="outlined" label="E-mail" placeholder="voce@exemplo.com" value={email} onChangeText={setEmail} autoCapitalize="none" autoComplete="email" keyboardType="email-address" textContentType="emailAddress" left={<TextInput.Icon icon="email-outline" />} error={submitted && !!emailError} returnKeyType="next" />
+            <TextInput
+              mode="outlined"
+              label="E-mail"
+              placeholder="voce@exemplo.com"
+              value={email}
+              onChangeText={setEmail}
+              autoCapitalize="none"
+              autoComplete="email"
+              keyboardType="email-address"
+              textContentType="emailAddress"
+              left={<TextInput.Icon icon="email-outline" />}
+              error={submitted && !!emailError}
+              returnKeyType="next"
+            />
             <HelperText type="error" visible={submitted && !!emailError}>{emailError}</HelperText>
           </View>
           <View>
-            <TextInput mode="outlined" label="Senha" value={password} onChangeText={setPassword} secureTextEntry={!passwordVisible} autoComplete="current-password" textContentType="password" left={<TextInput.Icon icon="lock-outline" />} right={<TextInput.Icon icon={passwordVisible ? 'eye-off-outline' : 'eye-outline'} onPress={() => setPasswordVisible((value) => !value)} />} error={submitted && !!passwordError} returnKeyType="done" onSubmitEditing={handleSubmit} />
+            <TextInput
+              mode="outlined"
+              label="Senha"
+              value={password}
+              onChangeText={setPassword}
+              secureTextEntry={!passwordVisible}
+              autoComplete="current-password"
+              textContentType="password"
+              left={<TextInput.Icon icon="lock-outline" />}
+              right={<TextInput.Icon icon={passwordVisible ? 'eye-off-outline' : 'eye-outline'} onPress={() => setPasswordVisible((value) => !value)} />}
+              error={submitted && !!passwordError}
+              returnKeyType="done"
+              onSubmitEditing={handleSubmit}
+            />
             <HelperText type="error" visible={submitted && !!passwordError}>{passwordError}</HelperText>
           </View>
-          <Button mode="contained" onPress={handleSubmit} style={styles.submit} contentStyle={styles.buttonContent}>
+          <Button mode="text" compact onPress={handleResetPassword} style={styles.forgot}>
+            Esqueci minha senha
+          </Button>
+          {feedback && (
+            <HelperText type={feedback.type} visible style={styles.feedback}>
+              {feedback.message}
+            </HelperText>
+          )}
+          <Button mode="contained" onPress={handleSubmit} loading={loading} disabled={loading} style={styles.submit} contentStyle={styles.buttonContent}>
             Entrar
           </Button>
           <View style={styles.switchRow}>
@@ -52,9 +112,6 @@ export default function LoginScreen() {
             <Link href="/registro" asChild><Button mode="text" compact> Criar conta </Button></Link>
           </View>
         </View>
-        <Text variant="bodySmall" style={[styles.note, { color: theme.colors.onSurfaceVariant }]}>
-          A autenticação será conectada quando houver um serviço de contas configurado.
-        </Text>
       </ScrollView>
     </KeyboardAvoidingView>
   );
@@ -67,8 +124,9 @@ const styles = StyleSheet.create({
   logo: { width: 76, height: 76, borderRadius: 24, alignItems: 'center', justifyContent: 'center', marginBottom: Spacing.sm },
   title: { textAlign: 'center' },
   form: { gap: Spacing.sm },
+  forgot: { alignSelf: 'flex-end', marginTop: -Spacing.md },
+  feedback: { textAlign: 'center' },
   submit: { marginTop: Spacing.sm },
   buttonContent: { minHeight: 48 },
   switchRow: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', flexWrap: 'wrap', marginTop: Spacing.sm },
-  note: { textAlign: 'center' },
 });

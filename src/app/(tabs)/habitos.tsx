@@ -1,7 +1,7 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { FlatList, ScrollView, StyleSheet, View } from 'react-native';
-import { Chip, FAB, Searchbar, Text, useTheme } from 'react-native-paper';
+import { ActivityIndicator, Chip, FAB, Searchbar, Text, useTheme } from 'react-native-paper';
 
 import { EmptyState } from '@/components/empty-state';
 import { HabitCard } from '@/components/habit-card';
@@ -20,7 +20,7 @@ function normalize(text: string) {
 
 export default function HabitsScreen() {
   const theme = useTheme();
-  const { habits } = useHabits();
+  const { habits, loading } = useHabits();
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState<CategoryId | null>(null);
 
@@ -63,7 +63,9 @@ export default function HabitsScreen() {
           <HabitCard habit={item} onPress={() => router.push({ pathname: '/habito/[id]', params: { id: item.id } })} />
         )}
         ListEmptyComponent={
-          habits.length === 0 ? (
+          loading ? (
+            <ActivityIndicator style={styles.loader} />
+          ) : habits.length === 0 ? (
             <EmptyState
               icon="playlist-plus"
               title="Você ainda não tem hábitos"
@@ -97,6 +99,9 @@ const styles = StyleSheet.create({
   },
   header: {
     gap: Spacing.md,
+  },
+  loader: {
+    marginTop: Spacing.xl,
   },
   chips: {
     gap: Spacing.sm,
