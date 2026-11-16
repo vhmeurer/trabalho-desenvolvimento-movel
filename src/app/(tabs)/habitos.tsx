@@ -8,6 +8,7 @@ import { HabitCard } from '@/components/habit-card';
 import { CATEGORIES } from '@/constants/habits';
 import { Spacing } from '@/constants/theme';
 import { useHabits } from '@/context/habits-context';
+import { useSampleHabits } from '@/hooks/use-sample-habits';
 import type { CategoryId } from '@/types/habit';
 
 function normalize(text: string) {
@@ -21,6 +22,7 @@ function normalize(text: string) {
 export default function HabitsScreen() {
   const theme = useTheme();
   const { habits, loading } = useHabits();
+  const sample = useSampleHabits();
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState<CategoryId | null>(null);
 
@@ -72,6 +74,9 @@ export default function HabitsScreen() {
               message="Que tal criar o primeiro agora?"
               actionLabel="Criar hábito"
               onAction={() => router.push('/habito/novo')}
+              secondaryActionLabel="Carregar hábitos de exemplo"
+              onSecondaryAction={sample.loadSampleHabits}
+              secondaryActionLoading={sample.loading}
             />
           ) : (
             <EmptyState

@@ -28,6 +28,10 @@ export function parseDateKey(key: string): Date {
   return new Date(`${key}T00:00:00`);
 }
 
+export function formatDayMonth(date: Date): string {
+  return date.toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' });
+}
+
 export function formatShortDate(date: Date): string {
   return date.toLocaleDateString('pt-BR');
 }
