@@ -1,8 +1,10 @@
 import { StyleSheet, View } from 'react-native';
-import { Avatar, Card, Checkbox, Icon, Text, useTheme } from 'react-native-paper';
+import { Card, Icon, Text, TouchableRipple, useTheme } from 'react-native-paper';
 
+import { DayChain } from '@/components/day-chain';
+import { HabitIcon } from '@/components/habit-icon';
 import { formatFrequency, getCategory } from '@/constants/habits';
-import { Spacing } from '@/constants/theme';
+import { Fonts, Spacing } from '@/constants/theme';
 import type { Habit } from '@/types/habit';
 import { currentStreak } from '@/utils/habit-stats';
 
@@ -19,53 +21,90 @@ export function HabitCard({ habit, subtitle, onPress, checked, onToggle }: Habit
   const streak = currentStreak(habit);
 
   return (
-    <Card mode="elevated" onPress={onPress} style={checked && styles.checked}>
-      <Card.Title
-        title={habit.name}
-        titleVariant="titleMedium"
-        titleStyle={checked && styles.checkedTitle}
-        subtitle={subtitle ?? `${getCategory(habit.category).label} · ${formatFrequency(habit)}`}
-        subtitleStyle={{ color: theme.colors.onSurfaceVariant }}
-        left={(props) => (
-          <Avatar.Icon {...props} icon={habit.icon} color="#FFFFFF" style={{ backgroundColor: habit.color }} />
-        )}
-        right={() => (
-          <View style={styles.right}>
-            <View style={styles.streak} accessibilityLabel={`Sequência de ${streak} dias`}>
-              <Icon source="fire" size={18} color={streak > 0 ? '#FB8C00' : theme.colors.outline} />
-              <Text variant="labelLarge">{streak}</Text>
-            </View>
-            {onToggle ? (
-              <Checkbox.Android status={checked ? 'checked' : 'unchecked'} onPress={onToggle} color={habit.color} />
-            ) : (
-              <Icon source="chevron-right" size={24} color={theme.colors.onSurfaceVariant} />
-            )}
+    <Card
+      mode="outlined"
+      onPress={onPress}
+      style={{ backgroundColor: theme.colors.surface, borderColor: theme.colors.outlineVariant }}>
+      <View style={styles.body}>
+        <View style={styles.header}>
+          <HabitIcon icon={habit.icon} color={habit.color} />
+
+          <View style={styles.titles}>
+            <Text variant="titleMedium" numberOfLines={1}>
+              {habit.name}
+            </Text>
+            <Text variant="bodySmall" numberOfLines={1} style={{ color: theme.colors.onSurfaceVariant }}>
+              {subtitle ?? `${getCategory(habit.category).label} · ${formatFrequency(habit)}`}
+            </Text>
           </View>
-        )}
-        rightStyle={styles.rightContainer}
-      />
+
+          <View style={styles.streak} accessible accessibilityLabel={`Sequência de ${streak} dias`}>
+            <Text style={[styles.streakNumber, { color: streak > 0 ? theme.colors.onSurface : theme.colors.outline }]}>
+              {streak}
+            </Text>
+            <Text style={[styles.streakUnit, { color: theme.colors.onSurfaceVariant }]}>
+              {streak === 1 ? 'dia' : 'dias'}
+            </Text>
+          </View>
+
+          {onToggle ? (
+            <TouchableRipple
+              borderless
+              onPress={onToggle}
+              accessibilityRole="checkbox"
+              accessibilityState={{ checked: !!checked }}
+              accessibilityLabel={checked ? `Desmarcar ${habit.name}` : `Marcar ${habit.name} como feito hoje`}
+              style={[
+                styles.check,
+                { borderColor: habit.color, backgroundColor: checked ? habit.color : 'transparent' },
+              ]}>
+              <Icon source="check" size={22} color={checked ? '#FFFFFF' : `${habit.color}66`} />
+            </TouchableRipple>
+          ) : (
+            <Icon source="chevron-right" size={22} color={theme.colors.onSurfaceVariant} />
+          )}
+        </View>
+
+        <DayChain habit={habit} />
+      </View>
     </Card>
   );
 }
 
 const styles = StyleSheet.create({
-  checked: {
-    opacity: 0.7,
+  body: {
+    padding: Spacing.md,
+    gap: Spacing.md,
   },
-  checkedTitle: {
-    textDecorationLine: 'line-through',
-  },
-  rightContainer: {
-    marginRight: Spacing.sm,
-  },
-  right: {
+  header: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.sm,
+    gap: Spacing.md - 4,
+  },
+  titles: {
+    flex: 1,
+    gap: 2,
   },
   streak: {
-    flexDirection: 'row',
     alignItems: 'center',
-    gap: 2,
+    minWidth: 32,
+  },
+  streakNumber: {
+    fontFamily: Fonts.bold,
+    fontSize: 20,
+    lineHeight: 24,
+  },
+  streakUnit: {
+    fontFamily: Fonts.medium,
+    fontSize: 10,
+    lineHeight: 12,
+  },
+  check: {
+    width: 40,
+    height: 40,
+    borderRadius: 20,
+    borderWidth: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
 });

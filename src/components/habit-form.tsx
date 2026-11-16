@@ -13,10 +13,12 @@ import {
   useTheme,
 } from 'react-native-paper';
 
+import { HabitCard } from '@/components/habit-card';
 import { CATEGORIES, HABIT_COLORS, HABIT_ICONS, WEEK_DAYS } from '@/constants/habits';
 import { Spacing } from '@/constants/theme';
 import { usePreferences } from '@/context/preferences-context';
-import type { Frequency, HabitInput } from '@/types/habit';
+import type { Frequency, Habit, HabitInput } from '@/types/habit';
+import { todayKey } from '@/utils/date';
 
 const TIME_PATTERN = /^([01]\d|2[0-3]):[0-5]\d$/;
 
@@ -54,6 +56,13 @@ export function HabitForm({ initialValues, submitLabel, onSubmit, onCancel }: Ha
     reminder: reminderEnabled && !TIME_PATTERN.test(reminderText) ? 'Use o formato HH:MM, por exemplo 08:30.' : null,
   };
   const hasErrors = Object.values(errors).some((error) => error !== null);
+  const preview: Habit = {
+    ...values,
+    name: values.name.trim() || 'Nome do hábito',
+    id: 'preview',
+    createdAt: todayKey(),
+    completions: [],
+  };
 
   function update<K extends keyof HabitInput>(key: K, value: HabitInput[K]) {
     setValues((current) => ({ ...current, [key]: value }));
@@ -85,6 +94,12 @@ export function HabitForm({ initialValues, submitLabel, onSubmit, onCancel }: Ha
         style={{ backgroundColor: theme.colors.background }}
         contentContainerStyle={styles.content}
         keyboardShouldPersistTaps="handled">
+        <View style={styles.preview}>
+          <Text variant="labelLarge" style={{ color: theme.colors.onSurfaceVariant }}>
+            Prévia
+          </Text>
+          <HabitCard habit={preview} />
+        </View>
         <View>
           <TextInput
             mode="outlined"
@@ -264,6 +279,9 @@ function Section({ title, children }: { title: string; children: React.ReactNode
 }
 
 const styles = StyleSheet.create({
+  preview: {
+    gap: Spacing.sm,
+  },
   flex: {
     flex: 1,
   },

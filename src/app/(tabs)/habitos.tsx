@@ -40,14 +40,21 @@ export default function HabitsScreen() {
         contentContainerStyle={styles.content}
         ListHeaderComponent={
           <View style={styles.header}>
-            <Searchbar placeholder="Buscar hábito" value={query} onChangeText={setQuery} />
+            <Searchbar
+              placeholder="Buscar hábito"
+              value={query}
+              onChangeText={setQuery}
+              elevation={0}
+              style={[styles.search, { backgroundColor: theme.colors.surface, borderColor: theme.colors.outlineVariant }]}
+            />
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.chips}>
-              <Chip selected={category === null} showSelectedOverlay onPress={() => setCategory(null)}>
+              <Chip mode="outlined" selected={category === null} showSelectedOverlay onPress={() => setCategory(null)}>
                 Todos
               </Chip>
               {CATEGORIES.map((item) => (
                 <Chip
                   key={item.id}
+                  mode="outlined"
                   icon={item.icon}
                   selected={category === item.id}
                   showSelectedOverlay
@@ -88,7 +95,13 @@ export default function HabitsScreen() {
         }
       />
 
-      <FAB icon="plus" style={styles.fab} onPress={() => router.push('/habito/novo')} accessibilityLabel="Novo hábito" />
+      <FAB
+        icon="plus"
+        color={theme.colors.onPrimary}
+        style={[styles.fab, { backgroundColor: theme.colors.primary }]}
+        onPress={() => router.push('/habito/novo')}
+        accessibilityLabel="Novo hábito"
+      />
     </View>
   );
 }
@@ -111,9 +124,14 @@ const styles = StyleSheet.create({
   chips: {
     gap: Spacing.sm,
   },
+  search: {
+    borderWidth: 1,
+    borderRadius: 16,
+  },
   fab: {
     position: 'absolute',
     right: Spacing.md,
     bottom: Spacing.md,
+    borderRadius: 16,
   },
 });

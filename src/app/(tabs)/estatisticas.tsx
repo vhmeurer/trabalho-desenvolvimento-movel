@@ -2,9 +2,11 @@ import { router } from 'expo-router';
 import { useState } from 'react';
 import { Pressable, ScrollView, StyleSheet, useWindowDimensions, View } from 'react-native';
 import { BarChart, PieChart } from 'react-native-gifted-charts';
-import { ActivityIndicator, Avatar, Card, ProgressBar, SegmentedButtons, Text, useTheme } from 'react-native-paper';
+import { ActivityIndicator, Card, ProgressBar, SegmentedButtons, Text, useTheme } from 'react-native-paper';
 
 import { EmptyState } from '@/components/empty-state';
+import { HabitIcon } from '@/components/habit-icon';
+import { StatTile } from '@/components/stat-tile';
 import { CATEGORIES, WEEK_DAYS } from '@/constants/habits';
 import { Spacing } from '@/constants/theme';
 import { useHabits } from '@/context/habits-context';
@@ -94,12 +96,9 @@ export default function StatsScreen() {
 
   return (
     <ScrollView style={{ backgroundColor: theme.colors.background }} contentContainerStyle={styles.content}>
-      <View>
-        <Text variant="headlineSmall">Estatísticas</Text>
-        <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-          Acompanhe sua constância ao longo do tempo.
-        </Text>
-      </View>
+      <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+        Acompanhe sua constância ao longo do tempo.
+      </Text>
 
       <SegmentedButtons
         value={period}
@@ -111,11 +110,11 @@ export default function StatsScreen() {
       />
 
       <View style={styles.summary}>
-        <SummaryCard icon="percent" value={`${percent(overallRate)}%`} label="Conclusão" />
-        <SummaryCard icon="check-all" value={String(checkIns)} label="Check-ins" />
-        <SummaryCard
-          icon="fire"
-          value={`${streakLeader.streak} ${streakLeader.streak === 1 ? 'dia' : 'dias'}`}
+        <StatTile value={`${percent(overallRate)}%`} label="Conclusão" />
+        <StatTile value={String(checkIns)} label="Check-ins" />
+        <StatTile
+          value={String(streakLeader.streak)}
+          unit={streakLeader.streak === 1 ? 'dia' : 'dias'}
           label={streakLeader.streak > 0 ? streakLeader.habit.name : 'Maior sequência'}
         />
       </View>
@@ -137,7 +136,7 @@ export default function StatsScreen() {
             spacing={slot * 0.45}
             initialSpacing={slot * 0.225}
             endSpacing={slot * 0.225}
-            barBorderRadius={6}
+            barBorderRadius={8}
             yAxisLabelSuffix="%"
             yAxisLabelWidth={Y_AXIS_WIDTH}
             yAxisTextStyle={axisText}
@@ -205,21 +204,6 @@ export default function StatsScreen() {
   );
 }
 
-function SummaryCard({ icon, value, label }: { icon: string; value: string; label: string }) {
-  const theme = useTheme();
-  return (
-    <Card mode="contained" style={styles.flex}>
-      <Card.Content style={styles.summaryContent}>
-        <Avatar.Icon size={32} icon={icon} />
-        <Text variant="titleMedium">{value}</Text>
-        <Text variant="labelSmall" numberOfLines={1} style={{ color: theme.colors.onSurfaceVariant }}>
-          {label}
-        </Text>
-      </Card.Content>
-    </Card>
-  );
-}
-
 function HabitRow({ habit, rate }: { habit: Habit; rate: number | null }) {
   return (
     <Pressable
@@ -227,7 +211,7 @@ function HabitRow({ habit, rate }: { habit: Habit; rate: number | null }) {
       accessibilityRole="button"
       accessibilityLabel={`${habit.name}: ${rate === null ? 'sem dias programados' : `${percent(rate)}% concluído`}`}
       style={styles.habitRow}>
-      <Avatar.Icon size={36} icon={habit.icon} color="#FFFFFF" style={{ backgroundColor: habit.color }} />
+      <HabitIcon icon={habit.icon} color={habit.color} size={36} />
       <View style={styles.flex}>
         <View style={styles.habitHeader}>
           <Text variant="bodyLarge" numberOfLines={1} style={styles.flex}>
@@ -258,11 +242,6 @@ const styles = StyleSheet.create({
   summary: {
     flexDirection: 'row',
     gap: Spacing.sm,
-  },
-  summaryContent: {
-    alignItems: 'center',
-    gap: Spacing.xs,
-    paddingHorizontal: Spacing.sm,
   },
   pieRow: {
     flexDirection: 'row',

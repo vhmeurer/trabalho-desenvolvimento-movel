@@ -1,28 +1,26 @@
 import { router, Stack, useLocalSearchParams } from 'expo-router';
 import { useState } from 'react';
-import { ScrollView, StyleSheet, View } from 'react-native';
-import { Avatar, Button, Card, Chip, Dialog, Divider, List, Portal, Text, useTheme } from 'react-native-paper';
+import { ScrollView, StyleSheet, View, type StyleProp, type ViewStyle } from 'react-native';
+import { Button, Card, Chip, Dialog, Divider, List, Portal, Text, useTheme } from 'react-native-paper';
 
+import { DayChain } from '@/components/day-chain';
 import { EmptyState } from '@/components/empty-state';
+import { HabitIcon } from '@/components/habit-icon';
+import { StatTile } from '@/components/stat-tile';
 import { formatFrequency, getCategory } from '@/constants/habits';
 import { Spacing } from '@/constants/theme';
 import { useHabits } from '@/context/habits-context';
-import { formatShortDate, lastDays, parseDateKey } from '@/utils/date';
+import { addDays, formatShortDate, parseDateKey } from '@/utils/date';
 import {
   bestStreak,
   completionRate,
   currentStreak,
-  isCompletedOn,
   isCompletedToday,
   isScheduledOn,
 } from '@/utils/habit-stats';
 import { goBackOr } from '@/utils/navigation';
 
-const HISTORY_DAYS = 28;
-
-function formatDays(count: number) {
-  return `${count} ${count === 1 ? 'dia' : 'dias'}`;
-}
+const HISTORY_WEEKS = 4;
 
 export default function HabitDetailsScreen() {
   const theme = useTheme();
@@ -49,11 +47,8 @@ export default function HabitDetailsScreen() {
   const category = getCategory(habit.category);
   const doneToday = isCompletedToday(habit);
   const scheduledToday = isScheduledOn(habit, new Date());
-  const stats = [
-    { label: 'Sequência', value: formatDays(currentStreak(habit)), icon: 'fire' },
-    { label: 'Recorde', value: formatDays(bestStreak(habit)), icon: 'trophy' },
-    { label: 'Últimos 30 dias', value: `${Math.round(completionRate(habit, 30) * 100)}%`, icon: 'percent' },
-  ];
+  const current = currentStreak(habit);
+  const best = bestStreak(habit);
 
   function handleDelete() {
     setConfirmDelete(false);
@@ -66,85 +61,60 @@ export default function HabitDetailsScreen() {
       <Stack.Screen options={{ title: habit.name }} />
       <ScrollView contentContainerStyle={styles.content}>
         <View style={styles.header}>
-          <Avatar.Icon size={72} icon={habit.icon} color="#FFFFFF" style={{ backgroundColor: habit.color }} />
-          <Text variant="headlineSmall" style={styles.center}>
-            {habit.name}
-          </Text>
-          {habit.description !== '' && (
-            <Text variant="bodyMedium" style={[styles.center, { color: theme.colors.onSurfaceVariant }]}>
-              {habit.description}
-            </Text>
-          )}
-          <View style={styles.chips}>
-            <Chip compact icon={category.icon}>
-              {category.label}
-            </Chip>
-            <Chip compact icon="calendar-sync">
-              {formatFrequency(habit)}
-            </Chip>
+          <HabitIcon icon={habit.icon} color={habit.color} size={56} />
+          <View style={styles.headerText}>
+            <Text variant="headlineSmall">{habit.name}</Text>
+            {habit.description !== '' && (
+              <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+                {habit.description}
+              </Text>
+            )}
           </View>
         </View>
 
+        <View style={styles.chips}>
+          <Chip compact mode="outlined" icon={category.icon}>
+            {category.label}
+          </Chip>
+          <Chip compact mode="outlined" icon="calendar-sync">
+            {formatFrequency(habit)}
+          </Chip>
+        </View>
+
         <Button
-          mode={doneToday ? 'contained-tonal' : 'contained'}
+          mode={doneToday ? 'outlined' : 'contained'}
           icon={doneToday ? 'check-circle' : 'checkbox-blank-circle-outline'}
           onPress={() => toggleToday(habit.id)}
           disabled={!scheduledToday && !doneToday}
           buttonColor={doneToday ? undefined : habit.color}
-          textColor={doneToday ? undefined : '#FFFFFF'}
+          textColor={doneToday ? habit.color : '#FFFFFF'}
+          style={doneToday && { borderColor: habit.color }}
           contentStyle={styles.mainButton}>
-          {doneToday ? 'Concluído hoje' : scheduledToday ? 'Marcar como feito hoje' : 'Não programado para hoje'}
+          {doneToday ? 'Feito hoje' : scheduledToday ? 'Marcar como feito hoje' : 'Não programado para hoje'}
         </Button>
 
         <View style={styles.stats}>
-          {stats.map((stat) => (
-            <Card key={stat.label} mode="contained" style={styles.statCard}>
-              <Card.Content style={styles.statContent}>
-                <Avatar.Icon size={32} icon={stat.icon} />
-                <Text variant="titleMedium">{stat.value}</Text>
-                <Text variant="labelSmall" style={[styles.center, { color: theme.colors.onSurfaceVariant }]}>
-                  {stat.label}
-                </Text>
-              </Card.Content>
-            </Card>
-          ))}
+          <StatTile value={String(current)} unit={current === 1 ? 'dia' : 'dias'} label="Sequência" />
+          <StatTile value={String(best)} unit={best === 1 ? 'dia' : 'dias'} label="Recorde" />
+          <StatTile value={`${Math.round(completionRate(habit, 30) * 100)}%`} label="Últimos 30 dias" />
         </View>
 
-        <Card mode="outlined">
-          <Card.Title title="Histórico" subtitle={`Últimas ${HISTORY_DAYS / 7} semanas`} />
-          <Card.Content>
-            <View style={styles.grid}>
-              {lastDays(HISTORY_DAYS).map((date) => {
-                const done = isCompletedOn(habit, date);
-                const scheduled = isScheduledOn(habit, date);
-                return (
-                  <View
-                    key={date.toISOString()}
-                    accessibilityLabel={`${formatShortDate(date)}: ${done ? 'feito' : scheduled ? 'não feito' : 'livre'}`}
-                    style={[
-                      styles.day,
-                      done
-                        ? { backgroundColor: habit.color }
-                        : scheduled
-                          ? { backgroundColor: theme.colors.surfaceVariant }
-                          : { borderWidth: 1, borderColor: theme.colors.outlineVariant },
-                    ]}>
-                    <Text
-                      variant="labelSmall"
-                      style={{ color: done ? '#FFFFFF' : theme.colors.onSurfaceVariant }}>
-                      {date.getDate()}
-                    </Text>
-                  </View>
-                );
-              })}
-            </View>
-            <View style={styles.legend}>
-              <Legend color={habit.color} label="Feito" />
-              <Legend color={theme.colors.surfaceVariant} label="Não feito" />
-              <Legend color="transparent" borderColor={theme.colors.outlineVariant} label="Livre" />
-            </View>
-          </Card.Content>
-        </Card>
+        <View style={[styles.history, { backgroundColor: theme.colors.surface, borderColor: theme.colors.outlineVariant }]}>
+          <View>
+            <Text variant="titleMedium">Histórico</Text>
+            <Text variant="bodySmall" style={{ color: theme.colors.onSurfaceVariant }}>
+              Últimas {HISTORY_WEEKS} semanas, uma corrente por semana
+            </Text>
+          </View>
+          {Array.from({ length: HISTORY_WEEKS }, (_, index) => HISTORY_WEEKS - 1 - index).map((weeksAgo) => (
+            <DayChain key={weeksAgo} habit={habit} endDate={addDays(new Date(), -7 * weeksAgo)} labels="date" />
+          ))}
+          <View style={styles.legend}>
+            <Legend label="Feito" node={{ backgroundColor: habit.color, borderColor: habit.color }} />
+            <Legend label="Perdido" node={{ borderColor: theme.colors.outline }} />
+            <Legend label="Livre" node={[styles.legendOff, { backgroundColor: theme.colors.outlineVariant }]} />
+          </View>
+        </View>
 
         <Card mode="outlined">
           <List.Item title="Meta" description={habit.goal || 'Sem meta definida'} left={(props) => <List.Icon {...props} icon="target" />} />
@@ -202,10 +172,12 @@ export default function HabitDetailsScreen() {
   );
 }
 
-function Legend({ color, label, borderColor }: { color: string; label: string; borderColor?: string }) {
+function Legend({ label, node }: { label: string; node: StyleProp<ViewStyle> }) {
   return (
     <View style={styles.legendItem}>
-      <View style={[styles.legendDot, { backgroundColor: color }, borderColor && { borderWidth: 1, borderColor }]} />
+      <View style={styles.legendSlot}>
+        <View style={[styles.legendNode, node]} />
+      </View>
       <Text variant="labelSmall">{label}</Text>
     </View>
   );
@@ -227,13 +199,17 @@ const styles = StyleSheet.create({
     textAlign: 'center',
   },
   header: {
+    flexDirection: 'row',
     alignItems: 'center',
-    gap: Spacing.sm,
+    gap: Spacing.md,
+  },
+  headerText: {
+    flex: 1,
+    gap: 2,
   },
   chips: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    justifyContent: 'center',
     gap: Spacing.sm,
   },
   mainButton: {
@@ -243,25 +219,11 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     gap: Spacing.sm,
   },
-  statCard: {
-    flex: 1,
-  },
-  statContent: {
-    alignItems: 'center',
-    gap: Spacing.xs,
-    paddingHorizontal: Spacing.sm,
-  },
-  grid: {
-    flexDirection: 'row',
-    flexWrap: 'wrap',
-    gap: 6,
-  },
-  day: {
-    width: '12%',
-    aspectRatio: 1,
-    borderRadius: 8,
-    alignItems: 'center',
-    justifyContent: 'center',
+  history: {
+    borderWidth: 1,
+    borderRadius: 12,
+    padding: Spacing.md,
+    gap: Spacing.md,
   },
   actions: {
     flexDirection: 'row',
@@ -270,16 +232,27 @@ const styles = StyleSheet.create({
   legend: {
     flexDirection: 'row',
     gap: Spacing.md,
-    marginTop: Spacing.md,
   },
   legendItem: {
     flexDirection: 'row',
     alignItems: 'center',
     gap: Spacing.xs,
   },
-  legendDot: {
+  legendSlot: {
     width: 12,
     height: 12,
-    borderRadius: 3,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  legendNode: {
+    width: 12,
+    height: 12,
+    borderRadius: 6,
+    borderWidth: 2,
+  },
+  legendOff: {
+    width: 6,
+    height: 6,
+    borderWidth: 0,
   },
 });

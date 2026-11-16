@@ -10,14 +10,20 @@ import {
   useTheme,
 } from "react-native-paper";
 
+import { StatTile } from "@/components/stat-tile";
 import { Spacing } from "@/constants/theme";
 import { useAuth } from "@/context/auth-context";
+import { useHabits } from "@/context/habits-context";
 import { useProfile } from "@/context/profile-context";
+import { bestStreak } from "@/utils/habit-stats";
 
 export default function ProfileScreen() {
   const theme = useTheme();
   const { profile } = useProfile();
   const { signOut } = useAuth();
+  const { habits } = useHabits();
+  const checkIns = habits.reduce((total, habit) => total + habit.completions.length, 0);
+  const record = habits.reduce((best, habit) => Math.max(best, bestStreak(habit)), 0);
   const initials = profile.name
     .trim()
     .split(/\s+/)
@@ -30,35 +36,33 @@ export default function ProfileScreen() {
       style={{ backgroundColor: theme.colors.background }}
       contentContainerStyle={styles.content}
     >
-      <Text variant="headlineSmall">Meu perfil</Text>
+      <View style={styles.profileCard}>
+        <Avatar.Text
+          size={64}
+          label={initials || "U"}
+          style={{ backgroundColor: theme.colors.primary }}
+          color={theme.colors.onPrimary}
+        />
+        <View style={styles.identity}>
+          <Text variant="titleLarge">{profile.name}</Text>
+          <Text
+            variant="bodyMedium"
+            style={{ color: theme.colors.onSurfaceVariant }}
+          >
+            {profile.email}
+          </Text>
+        </View>
+      </View>
 
-      <Card
-        mode="contained"
-        style={{ backgroundColor: theme.colors.primaryContainer }}
-      >
-        <Card.Content style={styles.profileCard}>
-          <Avatar.Text
-            size={72}
-            label={initials || "U"}
-            style={{ backgroundColor: theme.colors.primary }}
-            color={theme.colors.onPrimary}
-          />
-          <View style={styles.identity}>
-            <Text
-              variant="titleLarge"
-              style={{ color: theme.colors.onPrimaryContainer }}
-            >
-              {profile.name}
-            </Text>
-            <Text
-              variant="bodyMedium"
-              style={{ color: theme.colors.onPrimaryContainer }}
-            >
-              {profile.email}
-            </Text>
-          </View>
-        </Card.Content>
-      </Card>
+      <View style={styles.stats}>
+        <StatTile value={String(habits.length)} label="Hábitos" />
+        <StatTile value={String(checkIns)} label="Check-ins" />
+        <StatTile
+          value={String(record)}
+          unit={record === 1 ? "dia" : "dias"}
+          label="Recorde"
+        />
+      </View>
 
       <View style={styles.section}>
         <Text variant="titleMedium">Informações pessoais</Text>
@@ -110,8 +114,8 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     gap: Spacing.md,
-    paddingVertical: Spacing.md,
   },
+  stats: { flexDirection: "row", gap: Spacing.sm },
   identity: { flex: 1, gap: Spacing.xs },
   section: { gap: Spacing.sm },
 });

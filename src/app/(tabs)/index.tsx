@@ -1,23 +1,20 @@
 import { router } from 'expo-router';
 import { useState } from 'react';
 import { ScrollView, StyleSheet, View } from 'react-native';
-import { ActivityIndicator, Card, FAB, ProgressBar, Snackbar, Text, useTheme } from 'react-native-paper';
+import { ActivityIndicator, FAB, Snackbar, Text, useTheme } from 'react-native-paper';
+import { useSafeAreaInsets } from 'react-native-safe-area-context';
 
 import { EmptyState } from '@/components/empty-state';
 import { HabitCard } from '@/components/habit-card';
 import { QuoteCard } from '@/components/quote-card';
+import { TodayProgress } from '@/components/today-progress';
 import { getCategory } from '@/constants/habits';
 import { Spacing } from '@/constants/theme';
 import { useHabits } from '@/context/habits-context';
+import { useProfile } from '@/context/profile-context';
 import type { Habit } from '@/types/habit';
 import { formatLongDate } from '@/utils/date';
 import { isCompletedToday, isScheduledOn } from '@/utils/habit-stats';
-
-function motivationMessage(progress: number) {
-  if (progress === 1) return 'Parabéns, você concluiu tudo hoje!';
-  if (progress >= 0.5) return 'Falta pouco, continue assim!';
-  return 'Cada pequeno passo conta. Bora começar?';
-}
 
 function capitalize(text: string) {
   return text.charAt(0).toUpperCase() + text.slice(1);
@@ -25,17 +22,19 @@ function capitalize(text: string) {
 
 export default function TodayScreen() {
   const theme = useTheme();
+  const insets = useSafeAreaInsets();
+  const { profile } = useProfile();
   const { habits, loading, toggleToday } = useHabits();
   const [snackbar, setSnackbar] = useState<{ habitId: string; message: string } | null>(null);
 
+  const firstName = profile.name.trim().split(/\s+/)[0];
   const today = new Date();
   const scheduled = habits.filter((habit) => isScheduledOn(habit, today));
   const pending = scheduled.filter((habit) => !isCompletedToday(habit));
   const done = scheduled.filter(isCompletedToday);
-  const progress = scheduled.length > 0 ? done.length / scheduled.length : 0;
 
   function handleToggle(habit: Habit) {
-    const message = isCompletedToday(habit) ? `"${habit.name}" desmarcado` : `"${habit.name}" concluído!`;
+    const message = isCompletedToday(habit) ? `"${habit.name}" desmarcado` : `"${habit.name}" feito!`;
     toggleToday(habit.id);
     setSnackbar({ habitId: habit.id, message });
   }
@@ -50,7 +49,7 @@ export default function TodayScreen() {
       <HabitCard
         key={habit.id}
         habit={habit}
-        subtitle={habit.goal ? `${category} · ${habit.goal}` : category}
+        subtitle={habit.goal || category}
         checked={isCompletedToday(habit)}
         onToggle={() => handleToggle(habit)}
         onPress={() => openHabit(habit.id)}
@@ -60,66 +59,61 @@ export default function TodayScreen() {
 
   return (
     <View style={[styles.screen, { backgroundColor: theme.colors.background }]}>
-      <ScrollView contentContainerStyle={styles.content}>
-        <View>
-          <Text variant="headlineSmall">Olá!</Text>
+      <ScrollView contentContainerStyle={[styles.content, { paddingTop: insets.top + Spacing.md }]}>
+        <View style={styles.greeting}>
           <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
             {capitalize(formatLongDate(today))}
           </Text>
+          <Text variant="headlineMedium">{firstName ? `Olá, ${firstName}` : 'Olá'}</Text>
         </View>
-
-        <Card mode="contained" style={{ backgroundColor: theme.colors.primaryContainer }}>
-          <Card.Content style={styles.progressContent}>
-            <Text variant="titleMedium" style={{ color: theme.colors.onPrimaryContainer }}>
-              {done.length} de {scheduled.length} hábitos concluídos
-            </Text>
-            <View style={styles.progressWrapper}>
-              <ProgressBar progress={progress} color={theme.colors.primary} style={styles.progressBar} />
-            </View>
-            <Text variant="bodySmall" style={{ color: theme.colors.onPrimaryContainer }}>
-              {motivationMessage(progress)}
-            </Text>
-          </Card.Content>
-        </Card>
-
-        <QuoteCard />
 
         {loading ? (
           <ActivityIndicator style={styles.loader} />
         ) : scheduled.length === 0 ? (
-          <EmptyState
-            icon="calendar-blank"
-            title="Nenhum hábito para hoje"
-            message="Crie um hábito para começar a acompanhar sua rotina."
-            actionLabel="Criar hábito"
-            onAction={() => router.push('/habito/novo')}
-          />
+          <>
+            <QuoteCard />
+            <EmptyState
+              icon="calendar-blank"
+              title="Nenhum hábito para hoje"
+              message="Crie um hábito para começar sua primeira corrente."
+              actionLabel="Criar hábito"
+              onAction={() => router.push('/habito/novo')}
+            />
+          </>
         ) : (
           <>
-            <Text variant="titleSmall" style={styles.sectionTitle}>
-              Pendentes ({pending.length})
-            </Text>
-            {pending.length === 0 ? (
-              <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
-                Nenhum hábito pendente. Bom trabalho!
-              </Text>
-            ) : (
-              pending.map(renderHabit)
-            )}
+            <TodayProgress habits={scheduled} />
+
+            <View style={styles.section}>
+              <Text variant="titleMedium">Para fazer ({pending.length})</Text>
+              {pending.length === 0 ? (
+                <Text variant="bodyMedium" style={{ color: theme.colors.onSurfaceVariant }}>
+                  Nada pendente por hoje.
+                </Text>
+              ) : (
+                pending.map(renderHabit)
+              )}
+            </View>
+
+            <QuoteCard />
 
             {done.length > 0 && (
-              <>
-                <Text variant="titleSmall" style={styles.sectionTitle}>
-                  Concluídos ({done.length})
-                </Text>
+              <View style={styles.section}>
+                <Text variant="titleMedium">Feitos ({done.length})</Text>
                 {done.map(renderHabit)}
-              </>
+              </View>
             )}
           </>
         )}
       </ScrollView>
 
-      <FAB icon="plus" label="Novo hábito" style={styles.fab} onPress={() => router.push('/habito/novo')} />
+      <FAB
+        icon="plus"
+        label="Novo hábito"
+        color={theme.colors.onPrimary}
+        style={[styles.fab, { backgroundColor: theme.colors.primary }]}
+        onPress={() => router.push('/habito/novo')}
+      />
 
       <Snackbar
         visible={snackbar !== null}
@@ -139,18 +133,14 @@ const styles = StyleSheet.create({
   },
   content: {
     padding: Spacing.md,
-    paddingBottom: 96,
-    gap: Spacing.md,
+    paddingBottom: 104,
+    gap: Spacing.lg,
   },
-  progressContent: {
-    gap: Spacing.sm,
+  greeting: {
+    gap: 2,
   },
-  progressWrapper: {
-    height: 8,
-  },
-  progressBar: {
-    height: 8,
-    borderRadius: 4,
+  section: {
+    gap: Spacing.sm + 4,
   },
   snackbar: {
     bottom: 72,
@@ -158,12 +148,10 @@ const styles = StyleSheet.create({
   loader: {
     marginTop: Spacing.xl,
   },
-  sectionTitle: {
-    marginTop: Spacing.sm,
-  },
   fab: {
     position: 'absolute',
     right: Spacing.md,
     bottom: Spacing.md,
+    borderRadius: 16,
   },
 });

@@ -28,13 +28,17 @@ export function EmptyState({
 
   return (
     <View style={styles.container}>
-      <Icon source={icon} size={56} color={theme.colors.primary} />
-      <Text variant="titleMedium">{title}</Text>
-      <Text variant="bodyMedium" style={[styles.message, { color: theme.colors.onSurfaceVariant }]}>
+      <View style={[styles.iconTile, { backgroundColor: theme.colors.primaryContainer }]}>
+        <Icon source={icon} size={32} color={theme.colors.onPrimaryContainer} />
+      </View>
+      <Text variant="titleMedium" style={styles.center}>
+        {title}
+      </Text>
+      <Text variant="bodyMedium" style={[styles.center, { color: theme.colors.onSurfaceVariant }]}>
         {message}
       </Text>
       {actionLabel && onAction && (
-        <Button mode="contained-tonal" icon="plus" onPress={onAction} style={styles.action}>
+        <Button mode="contained" icon="plus" onPress={onAction} style={styles.action}>
           {actionLabel}
         </Button>
       )}
@@ -59,7 +63,15 @@ const styles = StyleSheet.create({
     paddingHorizontal: Spacing.lg,
     gap: Spacing.sm,
   },
-  message: {
+  iconTile: {
+    width: 64,
+    height: 64,
+    borderRadius: 20,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: Spacing.sm,
+  },
+  center: {
     textAlign: 'center',
   },
   action: {

@@ -1,9 +1,9 @@
-import MaterialCommunityIcons from '@expo/vector-icons/MaterialCommunityIcons';
 import { Link } from 'expo-router';
 import { useState } from 'react';
 import { KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View } from 'react-native';
 import { Button, HelperText, Text, TextInput, useTheme } from 'react-native-paper';
 
+import { BrandMark } from '@/components/brand-mark';
 import { Spacing } from '@/constants/theme';
 import { useAuth } from '@/context/auth-context';
 import { authErrorMessage } from '@/services/auth-errors';
@@ -52,8 +52,8 @@ export default function LoginScreen() {
     <KeyboardAvoidingView style={[styles.flex, { backgroundColor: theme.colors.background }]} behavior={Platform.OS === 'ios' ? 'padding' : undefined}>
       <ScrollView contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled" keyboardDismissMode="on-drag">
         <View style={styles.brand}>
-          <View style={[styles.logo, { backgroundColor: theme.colors.primaryContainer }]}>
-            <MaterialCommunityIcons name="check-circle-outline" size={38} color={theme.colors.primary} />
+          <View style={styles.logo}>
+            <BrandMark />
           </View>
           <Text variant="headlineMedium" style={styles.title}>Bem-vindo de volta</Text>
           <Text variant="bodyLarge" style={{ color: theme.colors.onSurfaceVariant, textAlign: 'center' }}>
@@ -121,7 +121,7 @@ const styles = StyleSheet.create({
   flex: { flex: 1 },
   content: { flexGrow: 1, justifyContent: 'center', padding: Spacing.lg, paddingTop: Spacing.xl, paddingBottom: Spacing.xl, gap: Spacing.xl },
   brand: { alignItems: 'center', gap: Spacing.sm },
-  logo: { width: 76, height: 76, borderRadius: 24, alignItems: 'center', justifyContent: 'center', marginBottom: Spacing.sm },
+  logo: { marginBottom: Spacing.md },
   title: { textAlign: 'center' },
   form: { gap: Spacing.sm },
   forgot: { alignSelf: 'flex-end', marginTop: -Spacing.md },

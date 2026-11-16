@@ -1,3 +1,8 @@
+import { Sora_400Regular } from '@expo-google-fonts/sora/400Regular';
+import { Sora_500Medium } from '@expo-google-fonts/sora/500Medium';
+import { Sora_600SemiBold } from '@expo-google-fonts/sora/600SemiBold';
+import { Sora_700Bold } from '@expo-google-fonts/sora/700Bold';
+import { useFonts } from 'expo-font';
 import { Stack, ThemeProvider } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { StyleSheet, View } from 'react-native';
@@ -11,7 +16,9 @@ import { PreferencesProvider, usePreferences } from '@/context/preferences-conte
 
 function ThemedApp() {
   const { darkMode } = usePreferences();
-  const { user, initializing } = useAuth();
+  const { user, initializing: authInitializing } = useAuth();
+  const [fontsLoaded, fontError] = useFonts({ Sora_400Regular, Sora_500Medium, Sora_600SemiBold, Sora_700Bold });
+  const initializing = authInitializing || (!fontsLoaded && !fontError);
   const paperTheme = darkMode ? AppDarkTheme : LightTheme;
 
   return (

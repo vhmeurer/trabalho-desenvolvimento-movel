@@ -35,3 +35,7 @@ export function formatDayMonth(date: Date): string {
 export function formatShortDate(date: Date): string {
   return date.toLocaleDateString('pt-BR');
 }
+
+export function isSameDay(a: Date, b: Date): boolean {
+  return toDateKey(a) === toDateKey(b);
+}
