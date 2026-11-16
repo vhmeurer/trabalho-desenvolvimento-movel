@@ -5,6 +5,7 @@ import { ActivityIndicator, Card, FAB, ProgressBar, Snackbar, Text, useTheme } f
 
 import { EmptyState } from '@/components/empty-state';
 import { HabitCard } from '@/components/habit-card';
+import { QuoteCard } from '@/components/quote-card';
 import { getCategory } from '@/constants/habits';
 import { Spacing } from '@/constants/theme';
 import { useHabits } from '@/context/habits-context';
@@ -80,6 +81,8 @@ export default function TodayScreen() {
             </Text>
           </Card.Content>
         </Card>
+
+        <QuoteCard />
 
         {loading ? (
           <ActivityIndicator style={styles.loader} />
