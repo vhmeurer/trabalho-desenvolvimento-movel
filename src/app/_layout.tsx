@@ -11,6 +11,7 @@ import { ActivityIndicator, PaperProvider } from 'react-native-paper';
 import { AppDarkTheme, getNavigationTheme, LightTheme } from '@/constants/theme';
 import { AuthProvider, useAuth } from '@/context/auth-context';
 import { HabitsProvider } from '@/context/habits-context';
+import { useAutofillStyle } from '@/hooks/use-autofill-style';
 import { ProfileProvider } from '@/context/profile-context';
 import { PreferencesProvider, usePreferences } from '@/context/preferences-context';
 
@@ -20,6 +21,7 @@ function ThemedApp() {
   const [fontsLoaded, fontError] = useFonts({ Sora_400Regular, Sora_500Medium, Sora_600SemiBold, Sora_700Bold });
   const initializing = authInitializing || (!fontsLoaded && !fontError);
   const paperTheme = darkMode ? AppDarkTheme : LightTheme;
+  useAutofillStyle(paperTheme);
 
   return (
     <PaperProvider theme={paperTheme}>
@@ -31,7 +33,6 @@ function ThemedApp() {
           </View>
         ) : (
           <Stack screenOptions={{ headerBackButtonDisplayMode: 'minimal' }}>
-            <Stack.Screen name="index" options={{ headerShown: false }} />
             <Stack.Protected guard={!user}>
               <Stack.Screen name="login" options={{ headerShown: false }} />
               <Stack.Screen name="registro" options={{ headerShown: false }} />
